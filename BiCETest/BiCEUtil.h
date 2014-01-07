@@ -8,6 +8,6 @@ protected:
 	~BiCEUtil() {}
 
 public:
-	static void computeBiCEDescriptor(cv::Mat_<uchar>& mat, float theta, cv::Mat_<float>& desc);
+	static void computeBiCEDescriptor(cv::Mat_<uchar>& mat, float theta, cv::Mat_<uchar>& desc);
 };
 

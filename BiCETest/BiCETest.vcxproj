@@ -129,6 +129,7 @@
     <ClInclude Include="RoadEdge.h" />
     <ClInclude Include="RoadGraph.h" />
     <ClInclude Include="RoadVertex.h" />
+    <ClInclude Include="TopNSearch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

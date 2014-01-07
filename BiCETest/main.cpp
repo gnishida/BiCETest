@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// 500x500行列に分割し、各行列について、BiCEデスクリプタを計算する。
-	cv::Mat_<float> desc[121];
+	cv::Mat_<uchar> desc[121];
 	//for (int i = 0; i < 11; i++) {
 	for (int i = 0; i < 1; i++) {
 		//for (int j = 0; j < 11; j++) {
