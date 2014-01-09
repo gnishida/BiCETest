@@ -3061,3 +3061,19 @@ void GraphUtil::printStatistics(RoadGraph* roads) {
 		qDebug() << i << ": " << lanesHistogram[i];
 	}
 }
+
+/**
+ * 道路網をcv::Mat行列に置き換える
+ */
+void GraphUtil::convertToMat(RoadGraph& roads, cv::Mat_<uchar>& mat, const cv::Size& size, const QVector2D& offset) {
+	mat = cv::Mat_<uchar>(size, 0);
+
+	RoadEdgeIter ei, eend;
+	for (boost::tie(ei, eend) = boost::edges(roads.graph); ei != eend; ++ei) {
+		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
+			QVector2D p0 = roads.graph[*ei]->polyLine[i] + offset;
+			QVector2D p1 = roads.graph[*ei]->polyLine[i + 1] + offset;
+			cv::line(mat, cv::Point(p0.x(), p0.y()), cv::Point(p1.x(), p1.y()), cv::Scalar(255), 1, CV_AA);
+		}
+	}
+}
