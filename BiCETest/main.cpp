@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 			cv::Mat_<uchar> sketch_binalized;
 			BiCEUtil::computeBiCEDescriptor(sub, 18, 18, 4, 20, 3, sketch_binalized, sketch_desc, "sketch", i * sketch_cols + j);
 
-			// 各パッチとのJaccar similarityを計算し、上位5件を保存する
+			// 各パッチとのJaccar similarityを計算し、上位15件を保存する
 			TopNSearch<int> tns;
 			for (int k = 0; k < binalized.size(); k++) {
 				float similarity = BiCEUtil::computeJaccarSimilarity(binalized[k], sketch_binalized);
@@ -80,6 +80,11 @@ int main(int argc, char *argv[]) {
 				char filename[256];
 				sprintf(filename, "results\\%d_%d_%d_%d.png", i * sketch_cols + j, k, results[k], isim);
 				cv::imwrite(filename, subs[results[k]]);
+
+				// AND画像を保存
+				cv::Mat and = BiCEUtil::and(binalized[results[k]], sketch_binalized);
+				sprintf(filename, "results\\%d_%d_%d_%d_and.png", i * sketch_cols + j, k, results[k], isim);
+				cv::imwrite(filename, and * 255);
 			}
 		}
 	}
