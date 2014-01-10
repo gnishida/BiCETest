@@ -30,7 +30,7 @@ protected:
 	~BiCEUtil() {}
 
 public:
-	static void computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int thetanum, int n, int k, cv::Mat& binalized, cv::Mat_<int>& desc, const char* file_temp, int index);
+	static void computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int thetanum, int n, int k, cv::Mat& binalized, const char* file_temp, int index);
 	static void binalize(cv::Mat& srcMat, cv::Mat& dstMat, float threshold);
 	static float computeJaccarSimilarity(cv::Mat& mat1, cv::Mat& mat2);
 	static cv::Mat and(cv::Mat& mat1, cv::Mat& mat2);

@@ -21,14 +21,13 @@ BiCESketch::BiCESketch(int m1, int m2, int m3) {
  * 角度は、thetanumでサンプリング。
  * k個のmin-hash値を行列の1つの行とし（つまり、列数=k）、合計n行の行列にして返却する。
  */
-void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int thetanum, int n, int k, cv::Mat& binalized, cv::Mat_<int>& desc, const char* file_temp, int index) {
-	// blur
+void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int thetanum, int n, int k, cv::Mat& binalized, const char* file_temp, int index) {
+	// 3 x 3 のガウシアンフィルタでぼかす（ロバストなマッチングを実現するため）
 	cv::Mat blur(mat.rows, mat.cols, CV_32F);
 	mat.convertTo(blur, CV_32F);
-	//cv::Mat blur(mat.rows, mat.cols, CV_8U);
 	cv::GaussianBlur(mat, blur, cv::Size(0, 0), 3, 3, cv::BORDER_DEFAULT);
 
-	// sub-sampling
+	// sub-sampling（これも、ロバストなマッチングを実現するため）
 	cv::Mat subsampled(xnum, ynum, CV_32F);
 	cv::resize(blur, subsampled, cv::Size(xnum, ynum));
 
@@ -37,49 +36,12 @@ void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int theta
 	sprintf(filename, "patch\\%s_%d_subsampled.png", file_temp, index);
 	cv::imwrite(filename, subsampled);
 
-	/*
-	// TOP 20%を1、それ以外は0にして、バイナリ化する
-	binalized = cv::Mat::zeros(subsampled.rows, subsampled.cols, CV_8U);
-	TopNSearch<int> tns;
-	for (int i = 0; i < subsampled.rows; i++) {
-		for (int j = 0; j < subsampled.cols; j++) {
-			tns.add(subsampled(i, j), i * subsampled.cols + j);
-		}
-	}
-
-	QList<int> topN = tns.topN(subsampled.rows * subsampled.cols * 0.3, TopNSearch<int>::ORDER_DESC);
-
-	for (int i = 0; i < topN.size(); i++) {
-		int c = topN[i] % subsampled.cols;
-		int r = (topN[i] - c) / subsampled.cols;
-
-		if (subsampled(r, c) == 0) break;
-
-		binalized.at<uchar>(r, c) = 1;
-	}
-	*/
-
-	/*
-	subsampled = subsampled * 2.0f;
-	subsampled.convertTo(binalized, CV_8U);
-	binalized = binalized / 255;
-	*/
-
-	binalize(subsampled, binalized, 128);
+	// しきい値64を使って、バイナリ化する（バイナリ化により、Jaccard similarityの計算が行える）
+	binalize(subsampled, binalized, 64);
 
 	// パッチを保存
 	sprintf(filename, "patch\\%s_%d_binalized.png", file_temp, index);
 	cv::imwrite(filename, binalized * 255);
-
-	/*
-	srand(1234567);
-	desc = cv::Mat_<int>(n, k);
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < k; j++) {
-			desc(i, j) = topN[rand() % topN.size()];
-		}
-	}
-	*/
 }
 
 void BiCEUtil::binalize(cv::Mat& srcMat, cv::Mat& dstMat, float threshold) {
