@@ -3073,7 +3073,7 @@ void GraphUtil::convertToMat(RoadGraph& roads, cv::Mat_<uchar>& mat, const cv::S
 		for (int i = 0; i < roads.graph[*ei]->polyLine.size() - 1; i++) {
 			QVector2D p0 = roads.graph[*ei]->polyLine[i] + offset;
 			QVector2D p1 = roads.graph[*ei]->polyLine[i + 1] + offset;
-			cv::line(mat, cv::Point(p0.x(), p0.y()), cv::Point(p1.x(), p1.y()), cv::Scalar(255), 3, CV_AA);
+			cv::line(mat, cv::Point(p0.x(), p0.y()), cv::Point(p1.x(), p1.y()), cv::Scalar(255), 1, CV_AA);
 		}
 	}
 

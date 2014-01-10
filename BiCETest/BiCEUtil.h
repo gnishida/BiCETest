@@ -1,6 +1,28 @@
 #pragma once
 
 #include <opencv2/opencv.hpp>
+#include <QHash>
+
+class BiCESketch {
+public:
+	int m1;
+	int m2;
+	int m3;
+
+public:
+	BiCESketch(int m1, int m2, int m3);
+	bool operator==(const BiCESketch& ref);
+};
+
+inline bool operator==(const BiCESketch& s1, const BiCESketch& s2) {
+	return (s1.m1 == s2.m1 && s1.m2 == s2.m2 && s1.m3 == s2.m3);
+}
+
+inline uint qHash(const BiCESketch& key) {
+	return qHash(key.m1 + key.m2 + key.m3);
+}
+
+
 
 class BiCEUtil {
 protected:
@@ -8,6 +30,7 @@ protected:
 	~BiCEUtil() {}
 
 public:
-	static void computeBiCEDescriptor(cv::Mat_<uchar>& mat, int xnum, int ynum, int thetanum, int n, int k, cv::Mat_<int>& desc, const char* file_temp, int index);
+	static void computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int thetanum, int n, int k, cv::Mat& binalized, cv::Mat_<int>& desc, const char* file_temp, int index);
+	static float computeJaccarSimilarity(cv::Mat& mat1, cv::Mat& mat2);
 };
 
