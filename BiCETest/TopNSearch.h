@@ -33,13 +33,19 @@ public:
 			}
 		} else {
 			QMapIterator<qreal, T> it(data);
+			//QMultiMap<qreal, T>::iterator it = data.begin();
 			it.toBack();
 			while (it.hasPrevious() && count < n) {
 				it.previous();
-				QList<T> values = data.values(it.key());
+				//QList<T> values = data.values(it.key());
+				T value = it.value();
+				ret.push_back(value);
+				count++;
+				/*
 				for (int i = 0; i < values.size() && count < n; i++, count++) {
 					ret.push_back(values[i]);
-				}				
+				}
+				*/
 			}
 		}
 

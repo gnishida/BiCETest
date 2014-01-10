@@ -36,19 +36,13 @@ int main(int argc, char *argv[]) {
 			cv::imwrite(filename, subs[count]);
 
 			cv::Mat_<int> desc;
-			BiCEUtil::computeBiCEDescriptor(subs[count], 18, 6, 4, 20, 3, binalized[count], desc, "london", count);
+			BiCEUtil::computeBiCEDescriptor(subs[count], 18, 18, 4, 20, 3, binalized[count], desc, "london", count);
 
 			count++;
 		}
 	}
 
 	// クエリ用の画像を読込む
-	//RoadGraph sketch;
-	//GraphUtil::loadRoads(&sketch, "osm/sketch_circle.png");
-	
-	// クエリ用の画像を、行列に変換
-	//cv::Mat_<uchar> sketch_mat;
-	//GraphUtil::convertToMat(sketch, sketch_mat, cv::Size(300, 300), QVector2D(150, 150));
 	cv::Mat_<uchar> sketch_mat = cv::imread("osm/sketch_circle.png", 0);
 
 	int sketch_rows = sketch_mat.rows * 4 / patch_size - 3;
@@ -57,19 +51,19 @@ int main(int argc, char *argv[]) {
 		for (int j = 0; j < sketch_cols; j++) {
 			cv::Mat sub = cv::Mat(sketch_mat, cv::Rect(j * patch_size / 4, i * patch_size / 4, patch_size, patch_size));
 
-			// スケッチを保存
-			char filename[256];
-			sprintf(filename, "patch\\sketch_%d.png", i * sketch_cols + j);
-			cv::imwrite(filename, sub);
-
 			cv::Mat v1;
 			cv::reduce(sub, v1, 0, CV_REDUCE_AVG);
 			cv::reduce(v1, v1, 1, CV_REDUCE_AVG);
 			if (v1.at<uchar>(0, 0) < 3) continue;
 
+			// スケッチを保存
+			char filename[256];
+			sprintf(filename, "patch\\sketch_%d.png", i * sketch_cols + j);
+			cv::imwrite(filename, sub);
+
 			cv::Mat_<int> sketch_desc;
 			cv::Mat_<uchar> sketch_binalized;
-			BiCEUtil::computeBiCEDescriptor(sub, 18, 6, 4, 20, 3, sketch_binalized, sketch_desc, "sketch", i * sketch_cols + j);
+			BiCEUtil::computeBiCEDescriptor(sub, 18, 18, 4, 20, 3, sketch_binalized, sketch_desc, "sketch", i * sketch_cols + j);
 
 			// 各パッチとのJaccar similarityを計算し、上位5件を保存する
 			TopNSearch<int> tns;
@@ -77,7 +71,7 @@ int main(int argc, char *argv[]) {
 				float similarity = BiCEUtil::computeJaccarSimilarity(binalized[k], sketch_binalized);
 				tns.add(similarity, k);
 			}
-			QList<int> results = tns.topN(5, TopNSearch<int>::ORDER_DESC);
+			QList<int> results = tns.topN(15, TopNSearch<int>::ORDER_DESC);
 			
 			for (int k = 0; k < results.size(); k++) {
 				float similarity = BiCEUtil::computeJaccarSimilarity(binalized[results[k]], sketch_binalized);

@@ -22,6 +22,7 @@ BiCESketch::BiCESketch(int m1, int m2, int m3) {
  * k個のmin-hash値を行列の1つの行とし（つまり、列数=k）、合計n行の行列にして返却する。
  */
 void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int thetanum, int n, int k, cv::Mat& binalized, cv::Mat_<int>& desc, const char* file_temp, int index) {
+	/*
 	cv::Mat_<float> grad = cv::Mat_<float>::zeros(mat.rows, mat.cols);
 
 	// compute the gradient magnitude
@@ -45,29 +46,34 @@ void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int theta
 	char filename[256];
 	sprintf(filename, "patch\\%s_%d_grad.png", file_temp, index);
 	cv::imwrite(filename, grad);
+	*/
 	
 	// compute the Gaussian weighted average
-	cv::Mat_<float> grad2(mat.rows, mat.cols);
+	/*cv::Mat_<float> grad2(mat.rows, mat.cols);
 	cv::GaussianBlur(grad, grad2, cv::Size(0, 0), 3, 3, cv::BORDER_DEFAULT);
 
 	// パッチを保存
 	sprintf(filename, "patch\\%s_%d_grad2.png", file_temp, index);
 	cv::imwrite(filename, grad2);
+	*/
 
 	// blur
-	cv::Mat_<float> blur(grad2.rows, grad2.cols);
-	cv::GaussianBlur(grad2, blur, cv::Size(0, 0), 1, 3, cv::BORDER_DEFAULT);
+	cv::Mat blur(mat.rows, mat.cols, CV_32F);
+	mat.convertTo(blur, CV_32F);
+	//cv::Mat blur(mat.rows, mat.cols, CV_8U);
+	cv::GaussianBlur(mat, blur, cv::Size(0, 0), 3, 3, cv::BORDER_DEFAULT);
 
 	// sub-sampling
-	cv::Mat_<float> subsampled(xnum, ynum);
+	cv::Mat subsampled(xnum, ynum, CV_32F);
 	cv::resize(blur, subsampled, cv::Size(xnum, ynum));
 
 	// パッチを保存
+	char filename[256];
 	sprintf(filename, "patch\\%s_%d_subsampled.png", file_temp, index);
 	cv::imwrite(filename, subsampled);
 
-	// binarize the values by assigning a value of 1 to the top 20 percent of the bins with highest values, and 0 to the others.
-	//cv::Mat_<uchar> binalized = cv::Mat_<uchar>::zeros(subsampled.rows, subsampled.cols);
+	/*
+	// TOP 20%を1、それ以外は0にして、バイナリ化する
 	binalized = cv::Mat::zeros(subsampled.rows, subsampled.cols, CV_8U);
 	TopNSearch<int> tns;
 	for (int i = 0; i < subsampled.rows; i++) {
@@ -76,7 +82,7 @@ void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int theta
 		}
 	}
 
-	QList<int> topN = tns.topN(subsampled.rows * subsampled.cols * 0.2, TopNSearch<int>::ORDER_DESC);
+	QList<int> topN = tns.topN(subsampled.rows * subsampled.cols * 0.3, TopNSearch<int>::ORDER_DESC);
 
 	for (int i = 0; i < topN.size(); i++) {
 		int c = topN[i] % subsampled.cols;
@@ -86,11 +92,17 @@ void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int theta
 
 		binalized.at<uchar>(r, c) = 1;
 	}
+	*/
+
+	subsampled = subsampled * 2.0f;
+	subsampled.convertTo(binalized, CV_8U);
+	binalized = binalized / 255;
 
 	// パッチを保存
 	sprintf(filename, "patch\\%s_%d_binalized.png", file_temp, index);
 	cv::imwrite(filename, binalized * 255);
 
+	/*
 	srand(1234567);
 	desc = cv::Mat_<int>(n, k);
 	for (int i = 0; i < n; i++) {
@@ -98,6 +110,7 @@ void BiCEUtil::computeBiCEDescriptor(cv::Mat& mat, int xnum, int ynum, int theta
 			desc(i, j) = topN[rand() % topN.size()];
 		}
 	}
+	*/
 }
 
 float BiCEUtil::computeJaccarSimilarity(cv::Mat& mat1, cv::Mat& mat2) {
@@ -119,4 +132,5 @@ float BiCEUtil::computeJaccarSimilarity(cv::Mat& mat1, cv::Mat& mat2) {
 
 	// Jaccar similarityを計算する
 	return m1.at<float>(0, 0) / m2.at<float>(0, 0);
+	//return m1.at<float>(0, 0);
 }
